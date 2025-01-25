@@ -1,0 +1,26 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+bin/
+build/
+
+# Environment files
+.env
+*.properties
+
+# Gradle
+.gradle/
+build/
+
+# Mac
+.DS_Store
