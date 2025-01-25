@@ -1,6 +1,15 @@
 package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.ResponseEntity;
+import com.example.demo.service.AuthService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+import com.example.demo.dto.request.*;
+import com.example.demo.dto.response.*;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,35 +17,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 
+// src/main/java/com/yourcompany/auth/controller/AuthController.java
+
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
+    private final AuthService authService;
+
+    @PostMapping("/signup")
+    public ResponseEntity<JwtResponse> signup(@Valid @RequestBody SignupRequest request) {
+        return ResponseEntity.ok(authService.signup(request));
+    }
+
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest loginRequest) {
-        // Implement your login logic here
-        return "Login successful";
+    public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 
-    @PostMapping("/register")
-    public String register(@RequestBody RegisterRequest registerRequest) {
-        // Implement your registration logic here
-        return "Registration successful";
-    }
-
-    // Define LoginRequest and RegisterRequest classes or use existing ones
-    public static class LoginRequest {
-        private String username;
-        private String password;
-
-        // Getters and setters
-    }
-
-    public static class RegisterRequest {
-        private String username;
-        private String password;
-        private String email;
-
-        // Getters and setters
-    }
+    // Other endpoints
 }
