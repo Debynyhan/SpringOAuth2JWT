@@ -1,0 +1,112 @@
+@startuml
+' Configuration Classes Diagram
+
+interface WebMvcConfigurer {
+    + addCorsMappings(CorsRegistry registry): void
+}
+
+class CorsConfig {
+    - String[] allowedOrigins
+    - String[] allowedMethods
+    - String[] allowedHeaders
+    - boolean allowCredentials
+    - long maxAge
+    
+    + CorsConfig()
+    + corsFilter(): CorsFilter
+    + addCorsMappings(CorsRegistry registry): void
+}
+
+CorsConfig .up.|> WebMvcConfigurer
+
+class OpenApiConfig {
+    - String projectTitle
+    - String projectVersion
+    - String projectDescription
+    - String securitySchemeName
+    
+    + OpenApiConfig()
+    + openAPI(): OpenAPI
+    + apiKeySecurityScheme(): SecurityScheme
+    + apiInfo(): Info
+    + securityContext(): SecurityContext
+}
+
+class RateLimitConfig {
+    - int capacity
+    - int timeWindowSeconds
+    - String[] excludedPaths
+    
+    + RateLimitConfig()
+    + rateLimitFilter(): FilterRegistrationBean<RateLimitFilter>
+    + createNewBucket(): Bucket
+    + shouldFilter(HttpServletRequest request): boolean
+}
+
+class SecurityConfig {
+    - JwtAuthenticationFilter jwtAuthenticationFilter
+    - JwtAuthorizationFilter jwtAuthorizationFilter
+    - UserDetailsService userDetailsService
+    - AuthenticationManager authenticationManager
+    - String[] publicEndpoints
+    
+    + SecurityConfig()
+    + securityFilterChain(HttpSecurity http): SecurityFilterChain
+    + authenticationManager(AuthenticationConfiguration config): AuthenticationManager
+    + passwordEncoder(): PasswordEncoder
+    + corsConfigurationSource(): CorsConfigurationSource
+}
+
+SecurityConfig --* CorsConfig : uses
+SecurityConfig --* JwtAuthenticationFilter : creates
+SecurityConfig --* JwtAuthorizationFilter : creates
+SecurityConfig ..> UserDetailsService : depends
+
+class JwtAuthenticationFilter {
+    - AuthenticationManager authenticationManager
+    - String loginEndpoint
+    
+    + JwtAuthenticationFilter()
+    + attemptAuthentication(HttpServletRequest, HttpServletResponse): Authentication
+    + successfulAuthentication(HttpServletRequest, HttpServletResponse, FilterChain, Authentication): void
+}
+
+class JwtAuthorizationFilter {
+    - JwtUtils jwtUtils
+    - String tokenHeader
+    
+    + JwtAuthorizationFilter()
+    + doFilterInternal(HttpServletRequest, HttpServletResponse, FilterChain): void
+}
+
+SecurityConfig --> JwtAuthenticationFilter
+SecurityConfig --> JwtAuthorizationFilter
+
+class SecurityFilterChain {
+    <<interface>>
+}
+
+SecurityConfig .up.|> SecurityFilterChainBuilder
+
+note top of CorsConfig
+    Configures CORS settings:
+    - allowedOrigins: ["http://localhost:3000"]
+    - allowedMethods: ["GET", "POST"]
+    - maxAge: 3600 seconds
+end note
+
+note right of OpenApiConfig
+    Swagger/OpenAPI 3 configuration:
+    - Sets API title/version
+    - Configures JWT security scheme
+    - Defines global security context
+end note
+
+note left of RateLimitConfig
+    Rate limiting using Bucket4j:
+    - 5 requests/minute default
+    - Excludes /actuator/health
+    - Uses Token Bucket algorithm
+end note
+
+@enduml
